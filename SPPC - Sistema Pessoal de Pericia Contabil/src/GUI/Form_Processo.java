@@ -5,12 +5,24 @@
  */
 package GUI;
 
+import ClassModel.Movimento_Class;
+import ConnectionFactory.ConnectionFactory;
+import DataAccessObj.DAO_CadastroMovimento;
 import com.sun.glass.events.KeyEvent;
 import java.awt.Color;
 import java.awt.Window;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import net.proteanit.sql.DbUtils;
+
+
+
+
 
 /**
  *
@@ -21,18 +33,80 @@ public class Form_Processo extends javax.swing.JFrame {
     /**
      * Creates new form Form_Processo
      */
-    public Form_Processo() {
+    
+    private Connection conn;
+    private PreparedStatement pstm;
+    private ResultSet rs;
+    
+    public Form_Processo(int p, String n) throws SQLException{
         initComponents();
         setLocationRelativeTo(null);
         jPanelEncargo.setVisible(false);
         //getContentPane().setBackground(Color.white);
         toolBarOptProcesso.setVisible(false);
+       
+        ///////////////////////////////////////////////////
+        try {
+            this.conn = new ConnectionFactory().getConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        this.setLabels(p, n);
+   
+        this.populateTableMovimento();
+        this.setVisible(true);
     }
+    
+    public void populateTableMovimento() throws SQLException {
+        String sql = String.format("SELECT datal, saldo FROM movimento WHERE processo = %s", labelProceso.getText());
+
+        //String sql = String.format("SELECT * FROM processo WHERE processo = %d", processo);
+        try {
+            pstm = conn.prepareStatement(sql);
+            rs = pstm.executeQuery();
+            
+            tabelamov.setModel(DbUtils.resultSetToTableModel(rs));
+            pstm.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
     
     public void setLabels(int processo, String nome){
         labelProceso.setText(String.valueOf(processo));
         labelNome.setText(nome);
     }
+    
+    public void Register() throws SQLException {
+
+        Movimento_Class movimento = new Movimento_Class();
+       
+        movimento.setProcesso(Integer.parseInt(labelProceso.getText()));
+        movimento.setData(datal.getText());
+        movimento.setSaldo(Double.parseDouble(saldo.getText().replace(",", ".")));
+
+        //movimento.setSaldo(Double.valueOf(saldo.getText()));
+
+        if (datal.getText().isEmpty() || saldo.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Não devem haver campos em branco!");
+        } else {
+            DAO_CadastroMovimento dao = new DAO_CadastroMovimento();
+            dao.add(movimento);
+            JOptionPane.showMessageDialog(null, "Movimento cadastrado.");
+            dispose();
+            new Form_Sistema().setVisible(true);
+        }
+
+    }
+    
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -51,12 +125,12 @@ public class Form_Processo extends javax.swing.JFrame {
         labelNome = new javax.swing.JLabel();
         labelProceso = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabelamov = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        saldo = new javax.swing.JTextField();
+        datal = new javax.swing.JFormattedTextField();
         jPanelEncargo = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
@@ -64,7 +138,7 @@ public class Form_Processo extends javax.swing.JFrame {
         jComboBox1 = new javax.swing.JComboBox();
         jLabel9 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-        jButton3 = new javax.swing.JButton();
+        salvar_mov = new javax.swing.JButton();
         jButtonEncargo = new javax.swing.JToggleButton();
         toolBarOptProcesso = new javax.swing.JToolBar();
         jButton7 = new javax.swing.JButton();
@@ -102,7 +176,7 @@ public class Form_Processo extends javax.swing.JFrame {
 
         jScrollPane1.setBorder(null);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tabelamov.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
                 {null, null, null},
@@ -128,7 +202,7 @@ public class Form_Processo extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tabelamov);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Movimento"));
 
@@ -137,7 +211,7 @@ public class Form_Processo extends javax.swing.JFrame {
         jLabel6.setText("Saldo:");
 
         try {
-            jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+            datal.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -202,10 +276,10 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addContainerGap(53, Short.MAX_VALUE))
         );
 
-        jButton3.setText("Salvar");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        salvar_mov.setText("Salvar");
+        salvar_mov.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                salvar_movActionPerformed(evt);
             }
         });
 
@@ -229,11 +303,11 @@ public class Form_Processo extends javax.swing.JFrame {
                             .addComponent(jLabel6))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(saldo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(datal, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(50, 50, 50)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(salvar_mov, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jButtonEncargo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -251,15 +325,15 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addGap(23, 23, 23)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(datal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(23, 23, 23)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(saldo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButtonEncargo)
                 .addGap(18, 18, 18)
-                .addComponent(jButton3)
+                .addComponent(salvar_mov)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -346,9 +420,16 @@ public class Form_Processo extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jTextField1KeyPressed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void salvar_movActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salvar_movActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+        try {
+            Register();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_CadastroProcesso.class.getName()).log(Level.SEVERE, null, ex);
+            //throw new RuntimeException(ex);
+        }
+        
+    }//GEN-LAST:event_salvar_movActionPerformed
 
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         toolBarOptProcesso.setVisible(true);
@@ -384,46 +465,14 @@ public class Form_Processo extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Form_Processo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Form_Processo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Form_Processo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Form_Processo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
-                new Form_Processo().setVisible(true);
-            }
-        });
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JFormattedTextField datal;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton7;
     private javax.swing.JToggleButton jButtonEncargo;
     private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -436,13 +485,14 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelEncargo;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel labelNome;
     private javax.swing.JLabel labelProceso;
+    private javax.swing.JTextField saldo;
+    private javax.swing.JButton salvar_mov;
+    private javax.swing.JTable tabelamov;
     private javax.swing.JToolBar toolBarOptProcesso;
     // End of variables declaration//GEN-END:variables
 }

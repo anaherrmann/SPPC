@@ -59,7 +59,7 @@ public class Form_Sistema extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     public void searchTableProcesso() {
@@ -405,25 +405,32 @@ public class Form_Sistema extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void tabelaProcessoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaProcessoMouseClicked
-        if (evt.getClickCount() == 2 && !(evt.isConsumed())) {
-            Form_Processo select = new Form_Processo();
-            int row = tabelaProcesso.rowAtPoint(evt.getPoint());
+        try {
+            if (evt.getClickCount() == 2 && !(evt.isConsumed())) {
+                Form_Processo select;
 
-            p = (int) tabelaProcesso.getValueAt(row, 0);
-            String n = (String) tabelaProcesso.getValueAt(row, 1);
+                int row = tabelaProcesso.rowAtPoint(evt.getPoint());
 
-            select.setLabels(p, n);
-            select.setVisible(true);
+                p = (int) tabelaProcesso.getValueAt(row, 0);
+                String n = (String) tabelaProcesso.getValueAt(row, 1);
+                
+                select = new Form_Processo(p, n);
+                
+//                select.setLabels(p, n);
+//                select.setVisible(true);
 
-        } else if (evt.getClickCount() == 1) {
-            int row = tabelaProcesso.rowAtPoint(evt.getPoint());
+            } else if (evt.getClickCount() == 1) {
+                int row = tabelaProcesso.rowAtPoint(evt.getPoint());
 
-            p = (int) tabelaProcesso.getValueAt(row, 0);
-            tabelaProcesso.setRowSelectionAllowed(true);
+                p = (int) tabelaProcesso.getValueAt(row, 0);
+                tabelaProcesso.setRowSelectionAllowed(true);
 
-            if (tabelaProcesso.isRowSelected(row)) {
-                buttonAlterarProcesso.setEnabled(true);
+                if (tabelaProcesso.isRowSelected(row)) {
+                    buttonAlterarProcesso.setEnabled(true);
+                }
             }
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_tabelaProcessoMouseClicked
 
