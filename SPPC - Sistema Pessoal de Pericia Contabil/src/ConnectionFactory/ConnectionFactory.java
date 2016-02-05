@@ -28,7 +28,7 @@ public class ConnectionFactory {
             conn = DriverManager.getConnection(url, username, password);
             //JOptionPane.showMessageDialog(null, "Connection Succeded!"); 
          } catch (SQLException error){
-             JOptionPane.showMessageDialog(null, "An error occured while trying to access database");
+             JOptionPane.showMessageDialog(null, "Ocorreu um erro ao tentar acessar o Banco de Dados.");
          }
          
          return conn;         

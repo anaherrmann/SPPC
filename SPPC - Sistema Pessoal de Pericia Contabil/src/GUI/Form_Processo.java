@@ -28,6 +28,11 @@ public class Form_Processo extends javax.swing.JFrame {
         //getContentPane().setBackground(Color.white);
         toolBarOptProcesso.setVisible(false);
     }
+    
+    public void setLabels(int processo, String nome){
+        labelProceso.setText(String.valueOf(processo));
+        labelNome.setText(nome);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -43,8 +48,8 @@ public class Form_Processo extends javax.swing.JFrame {
         jToggleButton1 = new javax.swing.JToggleButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        labelNome = new javax.swing.JLabel();
+        labelProceso = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
@@ -52,7 +57,6 @@ public class Form_Processo extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
-        jButtonEncargo = new javax.swing.JButton();
         jPanelEncargo = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
@@ -61,6 +65,7 @@ public class Form_Processo extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
+        jButtonEncargo = new javax.swing.JToggleButton();
         toolBarOptProcesso = new javax.swing.JToolBar();
         jButton7 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
@@ -91,9 +96,9 @@ public class Form_Processo extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel2.setText("Nome:");
 
-        jLabel3.setText("Anna Luisa Rermam");
+        labelNome.setText("Anna Luisa Rermam");
 
-        jLabel4.setText("1234567890");
+        labelProceso.setText("1234567890");
 
         jScrollPane1.setBorder(null);
 
@@ -136,13 +141,6 @@ public class Form_Processo extends javax.swing.JFrame {
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
-
-        jButtonEncargo.setText("Encargo");
-        jButtonEncargo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonEncargoActionPerformed(evt);
-            }
-        });
 
         jLabel7.setText("Data de Referência:");
 
@@ -211,6 +209,13 @@ public class Form_Processo extends javax.swing.JFrame {
             }
         });
 
+        jButtonEncargo.setText("Encargo");
+        jButtonEncargo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonEncargoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -228,12 +233,13 @@ public class Form_Processo extends javax.swing.JFrame {
                             .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(50, 50, 50)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButtonEncargo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jButtonEncargo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
                 .addComponent(jPanelEncargo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -254,7 +260,7 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addComponent(jButtonEncargo)
                 .addGap(18, 18, 18)
                 .addComponent(jButton3)
-                .addGap(24, 24, 24))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         toolBarOptProcesso.setBorder(null);
@@ -292,11 +298,11 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
+                        .addComponent(labelProceso)
                         .addGap(39, 39, 39)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel3)
+                        .addComponent(labelNome)
                         .addGap(311, 370, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -318,8 +324,8 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4))
+                    .addComponent(labelNome)
+                    .addComponent(labelProceso))
                 .addGap(25, 25, 25)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
@@ -329,10 +335,6 @@ public class Form_Processo extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButtonEncargoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncargoActionPerformed
-        jPanelEncargo.setVisible(true);
-    }//GEN-LAST:event_jButtonEncargoActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
@@ -365,8 +367,19 @@ public class Form_Processo extends javax.swing.JFrame {
             close[i].dispose();
             close[i] = null;
         }
-        new Form_Sistema().setVisible(true);
+        try {
+            new Form_Sistema().setVisible(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButtonEncargoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncargoActionPerformed
+        jPanelEncargo.setVisible(true);
+        if (!(jButtonEncargo.isSelected())) {
+            jPanelEncargo.setVisible(false);
+        }
+    }//GEN-LAST:event_jButtonEncargoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -408,14 +421,12 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton7;
-    private javax.swing.JButton jButtonEncargo;
+    private javax.swing.JToggleButton jButtonEncargo;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -430,6 +441,8 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField2;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JLabel labelNome;
+    private javax.swing.JLabel labelProceso;
     private javax.swing.JToolBar toolBarOptProcesso;
     // End of variables declaration//GEN-END:variables
 }

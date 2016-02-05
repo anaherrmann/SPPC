@@ -5,6 +5,16 @@
  */
 package GUI;
 
+import ClassModel.Processo_Class;
+import ConnectionFactory.ConnectionFactory;
+import DataAccessObj.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -16,10 +26,76 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
     /**
      * Creates new form Form_AlterarProcesso
      */
+    private Connection conn;
+    private PreparedStatement pstm;
+    private ResultSet rs;
+
+    public int id;
+
     public Form_AlterarProcesso() {
         initComponents();
         setLocationRelativeTo(null);
         jPanelTEncargo2.setVisible(false);
+        try {
+            this.conn = new ConnectionFactory().getConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_AlterarProcesso.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Form_AlterarProcesso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void fillFields(int processo) {
+
+        String sql = String.format("SELECT * FROM processo WHERE processo = %d", processo);
+        try {
+            pstm = conn.prepareStatement(sql);
+            rs = pstm.executeQuery();
+
+            if (rs.next()) {
+                id = rs.getInt("id");
+                textANome.setText(rs.getString("nome"));
+                textAProcesso.setText(String.valueOf(rs.getInt("processo")));
+                textABanco.setText(rs.getString("banco"));
+                textAConta.setText(String.valueOf(rs.getInt("conta")));
+                textAAgencia.setText(String.valueOf(rs.getInt("agencia")));
+            }
+            pstm.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_AlterarProcesso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void Update() throws SQLException {
+
+        Processo_Class processo = new Processo_Class();
+        
+        processo.setId(id);
+        processo.setNome(textANome.getText());
+        processo.setBanco(textABanco.getText());
+        processo.setProcesso(Integer.parseInt(textAProcesso.getText()));
+        processo.setConta(Integer.parseInt(textAConta.getText()));
+        processo.setAgencia(Integer.parseInt(textAAgencia.getText()));
+
+        DAO_AlterarProcesso dao = new DAO_AlterarProcesso();
+
+        dao.update(processo);
+        JOptionPane.showMessageDialog(null, "Processo atualizado.");
+        dispose();
+        new Form_Sistema().setVisible(true);
+
+    }
+    
+    public void Delete(){
+        DAO_DeletaProcesso dao = new DAO_DeletaProcesso();
+        dao.delete(id);
+        dispose();
+        try {
+            new Form_Sistema().setVisible(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_AlterarProcesso.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -32,16 +108,16 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        textANome = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        textAProcesso = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        textABanco = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        textAConta = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        textAAgencia = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         jLabel7 = new javax.swing.JLabel();
@@ -53,7 +129,7 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         jTextField7 = new javax.swing.JTextField();
         confAddTEncargo = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        buttonUpdateProcesso = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -140,7 +216,12 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
-        jButton1.setText("Atualizar");
+        buttonUpdateProcesso.setText("Atualizar");
+        buttonUpdateProcesso.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUpdateProcessoActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Deletar");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -165,12 +246,12 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addComponent(textANome, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textAProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textABanco, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textAConta, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textAAgencia, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(buttonUpdateProcesso, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -197,15 +278,15 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(textANome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(25, 25, 25)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(textAProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(25, 25, 25)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(textABanco, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(18, 18, 18)
@@ -217,13 +298,13 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
-                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(textAConta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(26, 26, 26)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
-                            .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(textAAgencia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1))
+                        .addComponent(buttonUpdateProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanelTEncargo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
@@ -254,15 +335,25 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         int op = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir o Processo (e seus Movimentos)?", "Deletar Processo", JOptionPane.YES_NO_OPTION);
-        
+        if (op==JOptionPane.YES_OPTION){
+            Delete();
+        } 
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
         jPanelTEncargo2.setVisible(true);
-        if (!(addButton.isSelected())){
+        if (!(addButton.isSelected())) {
             jPanelTEncargo2.setVisible(false);
         }
     }//GEN-LAST:event_addButtonActionPerformed
+
+    private void buttonUpdateProcessoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUpdateProcessoActionPerformed
+        try {
+            Update();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_AlterarProcesso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_buttonUpdateProcessoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -302,8 +393,8 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton addButton;
+    private javax.swing.JButton buttonUpdateProcesso;
     private javax.swing.JButton confAddTEncargo;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -317,13 +408,13 @@ public class Form_AlterarProcesso extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelTEncargo2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JTextField textAAgencia;
+    private javax.swing.JTextField textABanco;
+    private javax.swing.JTextField textAConta;
+    private javax.swing.JTextField textANome;
+    private javax.swing.JTextField textAProcesso;
     // End of variables declaration//GEN-END:variables
 }

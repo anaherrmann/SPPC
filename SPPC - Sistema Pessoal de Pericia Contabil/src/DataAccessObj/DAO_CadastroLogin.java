@@ -31,13 +31,14 @@ public class DAO_CadastroLogin {
         }
     }
 
-    public void add(Usuario_Class login) {
+    public void add(Usuario_Class login) throws SQLException {
 
         try {
             stm = conn.createStatement();
-            String sql = String.format("insert into login(usuario, senha, email, nome) values('%s', '%s', '%s', '%s')", login.getUsuario(), login.getSenha(), login.getEmail(), login.getNome());
+            String sql = String.format("INSERT INTO login(usuario, senha, email, nome) values('%s', '%s', '%s', '%s')", login.getUsuario(), login.getSenha(), login.getEmail(), login.getNome());
             stm.executeUpdate(sql);
             stm.close();
+            conn.close();
         } catch (SQLException ex) {
             Logger.getLogger(DAO_CadastroLogin.class.getName()).log(Level.SEVERE, null, ex);
         }

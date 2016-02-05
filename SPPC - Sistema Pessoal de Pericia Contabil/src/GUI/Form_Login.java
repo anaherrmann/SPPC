@@ -56,7 +56,7 @@ public class Form_Login extends javax.swing.JFrame {
     public void Access() throws SQLException {
 
         //String name = (String) name_Combo.getSelectedItem();
-        String sql = String.format("select * from login where usuario = ? and senha = ?"); // and nome LIKE '%s'", name_Combo.getSelectedItem()
+        String sql = String.format("select * from login where usuario = ? and senha = ?"); 
 
         pstm = conn.prepareStatement(sql);
 
@@ -83,10 +83,12 @@ public class Form_Login extends javax.swing.JFrame {
             }
             dispose();
             new Form_Sistema().setVisible(true);
-            JOptionPane.showMessageDialog(null, "Bem-vindo " + name + "!");
+            //JOptionPane.showMessageDialog(null, "Bem-vindo " + name + "!");
         } else {
             JOptionPane.showMessageDialog(null, "Usuário ou senha incorretos.");
         }
+        
+        conn.close();
 
     }
     /**
@@ -214,7 +216,7 @@ public class Form_Login extends javax.swing.JFrame {
     }//GEN-LAST:event_pass_loginActionPerformed
 
     private void pass_restoreMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pass_restoreMouseClicked
-        System.out.println("clicou.");        // TODO add your handling code here:
+        //System.out.println("clicou.");        // TODO add your handling code here:
     }//GEN-LAST:event_pass_restoreMouseClicked
 
     private void exit_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_ButtonActionPerformed

@@ -6,6 +6,9 @@
 package GUI;
 
 import java.awt.Window;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -241,7 +244,11 @@ public class Form_IndiceCorrecao extends javax.swing.JFrame {
             close[i].dispose();
             close[i] = null;
         }
-        new Form_Sistema().setVisible(true);
+        try {
+            new Form_Sistema().setVisible(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_IndiceCorrecao.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton7ActionPerformed
 
     /**

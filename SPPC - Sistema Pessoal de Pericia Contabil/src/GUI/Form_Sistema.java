@@ -5,9 +5,18 @@
  */
 package GUI;
 
+import ConnectionFactory.ConnectionFactory;
 import Main.Main;
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Box;
+import javax.swing.JOptionPane;
+import net.proteanit.sql.DbUtils;
 
 /**
  *
@@ -18,13 +27,54 @@ public class Form_Sistema extends javax.swing.JFrame {
     /**
      * Creates new form Form_MainWindow
      */
-    
-    public Form_Sistema() {
+    private Connection conn;
+    private PreparedStatement pstm;
+    private ResultSet rs;
+
+    public int p;
+
+    public Form_Sistema() throws SQLException {
         initComponents();
         setLocationRelativeTo(null);
-        //getContentPane().setBackground(Color.white);
         toolBarOptions.setVisible(false);
-        //listMagica.setVisible(false);
+        try {
+            this.conn = new ConnectionFactory().getConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        populateTableProcesso();
+        buttonAlterarProcesso.setEnabled(false);
+    }
+
+    public void populateTableProcesso() throws SQLException {
+        String sql = "SELECT processo, nome FROM processo";
+
+        try {
+            pstm = conn.prepareStatement(sql);
+            rs = pstm.executeQuery();
+            tabelaProcesso.setModel(DbUtils.resultSetToTableModel(rs));
+            pstm.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    public void searchTableProcesso() {
+
+        String sql = String.format("SELECT processo, nome FROM processo where nome like ?");
+        try {
+            pstm = conn.prepareStatement(sql);
+            pstm.setString(1, searchProcesso.getText() + "%");
+            rs = pstm.executeQuery();
+            tabelaProcesso.setModel(DbUtils.resultSetToTableModel(rs));
+            pstm.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -38,8 +88,8 @@ public class Form_Sistema extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tableInicial = new javax.swing.JTable();
-        search = new javax.swing.JTextField();
+        tabelaProcesso = new javax.swing.JTable();
+        searchProcesso = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jToolBar3 = new javax.swing.JToolBar();
         jButton3 = new javax.swing.JButton();
@@ -47,6 +97,7 @@ public class Form_Sistema extends javax.swing.JFrame {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        buttonAlterarProcesso = new javax.swing.JButton();
         jToolBar6 = new javax.swing.JToolBar();
         toggleButtonInicio = new javax.swing.JToggleButton();
         toolBarOptions = new javax.swing.JToolBar();
@@ -62,9 +113,9 @@ public class Form_Sistema extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Tela Inicial"));
 
-        tableInicial.setAutoCreateRowSorter(true);
-        tableInicial.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        tableInicial.setModel(new javax.swing.table.DefaultTableModel(
+        tabelaProcesso.setAutoCreateRowSorter(true);
+        tabelaProcesso.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        tabelaProcesso.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -96,33 +147,43 @@ public class Form_Sistema extends javax.swing.JFrame {
                 "Processo", "Nome"
             }
         ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class
+            };
             boolean[] canEdit = new boolean [] {
                 false, false
             };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
-        tableInicial.setAlignmentX(1.5F);
-        tableInicial.setAlignmentY(1.5F);
-        tableInicial.addMouseListener(new java.awt.event.MouseAdapter() {
+        tabelaProcesso.setAlignmentX(1.5F);
+        tabelaProcesso.setAlignmentY(1.5F);
+        tabelaProcesso.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tableInicialMouseClicked(evt);
+                tabelaProcessoMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(tableInicial);
+        jScrollPane1.setViewportView(tabelaProcesso);
 
-        search.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        search.setToolTipText("Digite o número do processo ou o nome do cliente");
+        searchProcesso.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        searchProcesso.setToolTipText("Digite o número do processo ou o nome do cliente");
+        searchProcesso.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchProcessoKeyReleased(evt);
+            }
+        });
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IconsGUI/search-icon.png"))); // NOI18N
 
-        jToolBar3.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar3.setBorder(null);
         jToolBar3.setRollover(true);
 
-        jButton3.setBackground(new java.awt.Color(255, 255, 255));
         jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IconsGUI/bank-icon.png"))); // NOI18N
         jButton3.setToolTipText("Banco Central do Brasil");
         jButton3.setFocusable(false);
@@ -135,11 +196,9 @@ public class Form_Sistema extends javax.swing.JFrame {
         });
         jToolBar3.add(jButton3);
 
-        jToolBar4.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar4.setBorder(null);
         jToolBar4.setRollover(true);
 
-        jButton4.setBackground(new java.awt.Color(255, 255, 255));
         jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IconsGUI/coins-icon.png"))); // NOI18N
         jButton4.setToolTipText("Índice de Correção");
         jButton4.setFocusable(false);
@@ -167,6 +226,14 @@ public class Form_Sistema extends javax.swing.JFrame {
             }
         });
 
+        buttonAlterarProcesso.setIcon(new javax.swing.ImageIcon("C:\\Users\\Leticia\\Desktop\\icones\\Pencil-icon.png")); // NOI18N
+        buttonAlterarProcesso.setText("Alterar Processo");
+        buttonAlterarProcesso.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAlterarProcessoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -183,13 +250,15 @@ public class Form_Sistema extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(buttonAlterarProcesso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(16, Short.MAX_VALUE)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(search, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(searchProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton5)
                 .addGap(270, 270, 270))
@@ -204,7 +273,7 @@ public class Form_Sistema extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(search, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
+                            .addComponent(searchProcesso, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
                             .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -212,7 +281,9 @@ public class Form_Sistema extends javax.swing.JFrame {
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton1)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(buttonAlterarProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jToolBar3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
@@ -220,7 +291,6 @@ public class Form_Sistema extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jToolBar6.setBackground(new java.awt.Color(255, 255, 255));
         jToolBar6.setBorder(null);
         jToolBar6.setRollover(true);
 
@@ -235,6 +305,7 @@ public class Form_Sistema extends javax.swing.JFrame {
         });
         jToolBar6.add(toggleButtonInicio);
 
+        toolBarOptions.setBorder(null);
         toolBarOptions.setRollover(true);
 
         jButton6.setText("Alterar Processo");
@@ -298,12 +369,14 @@ public class Form_Sistema extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(toolBarOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 598, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(toolBarOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 598, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jToolBar6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -331,17 +404,32 @@ public class Form_Sistema extends javax.swing.JFrame {
         new Form_BancoCentralBr().setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void tableInicialMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableInicialMouseClicked
-        if (evt.getClickCount() == 2 && !(evt.isConsumed())){
-            new Form_Processo().setVisible(true);
-        } else if (evt.getClickCount()==1){
-            tableInicial.setRowSelectionAllowed(true);
-        }    
-    }//GEN-LAST:event_tableInicialMouseClicked
+    private void tabelaProcessoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaProcessoMouseClicked
+        if (evt.getClickCount() == 2 && !(evt.isConsumed())) {
+            Form_Processo select = new Form_Processo();
+            int row = tabelaProcesso.rowAtPoint(evt.getPoint());
+
+            p = (int) tabelaProcesso.getValueAt(row, 0);
+            String n = (String) tabelaProcesso.getValueAt(row, 1);
+
+            select.setLabels(p, n);
+            select.setVisible(true);
+
+        } else if (evt.getClickCount() == 1) {
+            int row = tabelaProcesso.rowAtPoint(evt.getPoint());
+
+            p = (int) tabelaProcesso.getValueAt(row, 0);
+            tabelaProcesso.setRowSelectionAllowed(true);
+
+            if (tabelaProcesso.isRowSelected(row)) {
+                buttonAlterarProcesso.setEnabled(true);
+            }
+        }
+    }//GEN-LAST:event_tabelaProcessoMouseClicked
 
     private void toggleButtonInicioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toggleButtonInicioActionPerformed
         toolBarOptions.setVisible(true);
-        if (!(toggleButtonInicio.isSelected())){
+        if (!(toggleButtonInicio.isSelected())) {
             toolBarOptions.setVisible(false);
         }
     }//GEN-LAST:event_toggleButtonInicioActionPerformed
@@ -365,6 +453,18 @@ public class Form_Sistema extends javax.swing.JFrame {
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
         new Form_PassSecurity().setVisible(true);
     }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void searchProcessoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchProcessoKeyReleased
+
+        searchTableProcesso();
+
+    }//GEN-LAST:event_searchProcessoKeyReleased
+
+    private void buttonAlterarProcessoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAlterarProcessoActionPerformed
+        Form_AlterarProcesso altera = new Form_AlterarProcesso();
+        altera.setVisible(true);
+        altera.fillFields(p);
+    }//GEN-LAST:event_buttonAlterarProcessoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -404,12 +504,17 @@ public class Form_Sistema extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                new Form_Sistema().setVisible(true);
+                try {
+                    new Form_Sistema().setVisible(true);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Form_Sistema.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonAlterarProcesso;
     private javax.swing.JButton exitButton;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -425,8 +530,8 @@ public class Form_Sistema extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar3;
     private javax.swing.JToolBar jToolBar4;
     private javax.swing.JToolBar jToolBar6;
-    private javax.swing.JTextField search;
-    private javax.swing.JTable tableInicial;
+    private javax.swing.JTextField searchProcesso;
+    private javax.swing.JTable tabelaProcesso;
     private javax.swing.JToggleButton toggleButtonInicio;
     private javax.swing.JToolBar toolBarOptions;
     // End of variables declaration//GEN-END:variables

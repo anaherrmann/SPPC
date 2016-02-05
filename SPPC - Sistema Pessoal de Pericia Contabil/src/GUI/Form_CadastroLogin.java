@@ -13,6 +13,9 @@ import ClassModel.Usuario_Class;
 import DataAccessObj.DAO_CadastroLogin;
 import com.sun.glass.events.KeyEvent;
 import java.awt.Color;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class Form_CadastroLogin extends javax.swing.JFrame {
@@ -26,7 +29,8 @@ public class Form_CadastroLogin extends javax.swing.JFrame {
         getContentPane().setBackground(Color.white);
     }
     
-    private void Register() {
+    private void Register() throws SQLException {
+        
         Usuario_Class login = new Usuario_Class();
         
         if (pass_field.getText().equals(pass2_field.getText())) {
@@ -38,6 +42,7 @@ public class Form_CadastroLogin extends javax.swing.JFrame {
             if (name_field.getText().isEmpty() || user_field.getText().isEmpty() || pass_field.getText().isEmpty() || pass2_field.getText().isEmpty() || email_field.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Não devem haver campos em branco!");
             } else {
+                
                 DAO_CadastroLogin dao = new DAO_CadastroLogin();
                 dao.add(login);
                 dispose();
@@ -234,13 +239,21 @@ public class Form_CadastroLogin extends javax.swing.JFrame {
 
     private void register_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_register_buttonActionPerformed
         
-        Register();
+        try {
+            Register();
+        } catch (SQLException ex) {
+            Logger.getLogger(Form_CadastroLogin.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_register_buttonActionPerformed
 
     private void pass2_fieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pass2_fieldKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            Register();
+            try {
+                Register();
+            } catch (SQLException ex) {
+                Logger.getLogger(Form_CadastroLogin.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_pass2_fieldKeyPressed
 

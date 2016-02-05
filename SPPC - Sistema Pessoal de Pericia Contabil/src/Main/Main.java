@@ -63,11 +63,7 @@ public class Main {
             setNome(name);
             setCheck2(check);
             if (check){
-                //new Form_CadastroProcesso().setVisible(true);
                 new Form_Sistema().setVisible(true);
-                //new Form_Processo().setVisible(true);
-                //new Form_AlterarProcesso().setVisible(true);
-                //new Form_AlterarTaxaBCB().setVisible(true);
             } else {
                 new Form_Login().setVisible(true);
             }
