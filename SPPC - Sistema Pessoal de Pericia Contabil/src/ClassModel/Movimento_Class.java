@@ -11,13 +11,39 @@ package ClassModel;
  * @author Leticia
  */
 public class Movimento_Class {
-    
+   
+    int id;
     int processo;
     String data;
     double saldo;
-    //char tipo_movimento;
-    int id;
+    String dataRef;
+    double valorEncargo;
+    String tipoEncargo;
     
+    public String getDataRef() {
+        return dataRef;
+    }
+    
+    public void setDataRef(String dataRef) {
+        this.dataRef = dataRef;
+    }
+
+    public double getValorEncargo() {
+        return valorEncargo;
+    }
+    
+    public void setValorEncargo(double valorEncargo) {
+        this.valorEncargo = valorEncargo;
+    }
+
+    public String getTipoEncargo() {
+        return tipoEncargo;
+    }
+    
+    public void setTipoEncargo(String tipoEncargo) {
+        this.tipoEncargo = tipoEncargo;
+    }
+
     public int getProcesso() {
         return processo;
     }

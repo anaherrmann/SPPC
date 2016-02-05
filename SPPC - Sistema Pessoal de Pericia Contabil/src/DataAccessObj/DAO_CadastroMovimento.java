@@ -31,20 +31,36 @@ public class DAO_CadastroMovimento {
         }
     }
 
-    public void add(Movimento_Class p) throws SQLException {
+    public void add(Movimento_Class p, boolean encargo) throws SQLException {
         
         //Form_Sistema tabela = new Form_Sistema();
-        
-        try {
-            stm = conn.createStatement();
-            String sql = String.format("INSERT INTO movimento(datal, saldo, processo) values ('%s', '%s', '%d')",
-                    p.getData(), String.format("%.2f", p.getSaldo()).replace(",", "."), p.getProcesso());
-            stm.executeUpdate(sql);
-            stm.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(DAO_CadastroMovimento.class.getName()).log(Level.SEVERE, null, ex);
+        if (encargo){
+            try {
+                stm = conn.createStatement();
+                String sql = String.format("INSERT INTO movimento(datal, saldo, processo, data_ref, tipo_encargo, valor_encargo) values ('%s', '%s', '%d', '%s', '%s', '%s')",
+                        p.getData(), String.format("%.2f", p.getSaldo()).replace(",", "."), p.getProcesso(), p.getDataRef(), p.getTipoEncargo(),
+                        String.format("%.2f", p.getValorEncargo()).replace(",", "."));
+                stm.executeUpdate(sql);
+                stm.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DAO_CadastroMovimento.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            conn.close();
+        }
+        else{
+            try {
+                stm = conn.createStatement();
+                String sql = String.format("INSERT INTO movimento(datal, saldo, processo) values ('%s', '%s', '%d')",
+                        p.getData(), String.format("%.2f", p.getSaldo()).replace(",", "."), p.getProcesso());
+                stm.executeUpdate(sql);
+                stm.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DAO_CadastroMovimento.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            conn.close();
         }
         
-        conn.close();
     }
 }

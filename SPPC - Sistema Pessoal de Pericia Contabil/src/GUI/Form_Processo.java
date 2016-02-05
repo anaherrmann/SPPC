@@ -37,6 +37,7 @@ public class Form_Processo extends javax.swing.JFrame {
     private Connection conn;
     private PreparedStatement pstm;
     private ResultSet rs;
+    private boolean encargo = false;
     
     public Form_Processo(int p, String n) throws SQLException{
         initComponents();
@@ -54,22 +55,22 @@ public class Form_Processo extends javax.swing.JFrame {
             Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.setLabels(p, n);
+        if (n != null) this.setLabels(p, n);
    
         this.populateTableMovimento();
         this.setVisible(true);
     }
     
     public void populateTableMovimento() throws SQLException {
-        String sql = String.format("SELECT datal, saldo FROM movimento WHERE processo = %s", labelProceso.getText());
+        String sql = String.format("SELECT datal as \"Data\", saldo as \"Saldo\", valor_encargo as \"Taxa Praticada\" FROM movimento WHERE processo = %s", labelProceso.getText());
 
-        //String sql = String.format("SELECT * FROM processo WHERE processo = %d", processo);
         try {
             pstm = conn.prepareStatement(sql);
             rs = pstm.executeQuery();
             
             tabelamov.setModel(DbUtils.resultSetToTableModel(rs));
             pstm.close();
+            
         } catch (SQLException ex) {
             Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -83,23 +84,28 @@ public class Form_Processo extends javax.swing.JFrame {
     }
     
     public void Register() throws SQLException {
-
+        
         Movimento_Class movimento = new Movimento_Class();
-       
+        
         movimento.setProcesso(Integer.parseInt(labelProceso.getText()));
         movimento.setData(datal.getText());
         movimento.setSaldo(Double.parseDouble(saldo.getText().replace(",", ".")));
-
-        //movimento.setSaldo(Double.valueOf(saldo.getText()));
+        
+        if (encargo)
+        {
+            movimento.setDataRef(dataRef.getText());
+            movimento.setTipoEncargo((String) tipoEncargo.getSelectedItem());
+            movimento.setValorEncargo(Double.parseDouble(valorEncargo.getText().replace(",", ".")));
+        }
 
         if (datal.getText().isEmpty() || saldo.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Não devem haver campos em branco!");
         } else {
             DAO_CadastroMovimento dao = new DAO_CadastroMovimento();
-            dao.add(movimento);
+            dao.add(movimento, encargo);
             JOptionPane.showMessageDialog(null, "Movimento cadastrado.");
             dispose();
-            new Form_Sistema().setVisible(true);
+            new Form_Processo(Integer.valueOf(this.labelProceso.getText()), labelNome.getText()).setVisible(true);
         }
 
     }
@@ -133,11 +139,11 @@ public class Form_Processo extends javax.swing.JFrame {
         datal = new javax.swing.JFormattedTextField();
         jPanelEncargo = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
-        jFormattedTextField2 = new javax.swing.JFormattedTextField();
+        dataRef = new javax.swing.JFormattedTextField();
         jLabel8 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
+        tipoEncargo = new javax.swing.JComboBox();
         jLabel9 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        valorEncargo = new javax.swing.JTextField();
         salvar_mov = new javax.swing.JButton();
         jButtonEncargo = new javax.swing.JToggleButton();
         toolBarOptProcesso = new javax.swing.JToolBar();
@@ -219,25 +225,25 @@ public class Form_Processo extends javax.swing.JFrame {
         jLabel7.setText("Data de Referência:");
 
         try {
-            jFormattedTextField2.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+            dataRef.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
 
         jLabel8.setText("Tipo de Encargo:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Selecione...", "Cheque Especial", "Item 3", "Item 4" }));
+        tipoEncargo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Selecione...", "Cheque Especial", "Item 3", "Item 4" }));
 
         jLabel9.setText("Taxa Praticada:");
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        valorEncargo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                valorEncargoActionPerformed(evt);
             }
         });
-        jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+        valorEncargo.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                jTextField1KeyPressed(evt);
+                valorEncargoKeyPressed(evt);
             }
         });
 
@@ -253,9 +259,9 @@ public class Form_Processo extends javax.swing.JFrame {
                     .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanelEncargoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jFormattedTextField2)
-                    .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField1))
+                    .addComponent(dataRef)
+                    .addComponent(tipoEncargo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(valorEncargo))
                 .addContainerGap(28, Short.MAX_VALUE))
         );
         jPanelEncargoLayout.setVerticalGroup(
@@ -264,15 +270,15 @@ public class Form_Processo extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelEncargoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(dataRef, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(30, 30, 30)
                 .addGroup(jPanelEncargoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tipoEncargo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(25, 25, 25)
                 .addGroup(jPanelEncargoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(valorEncargo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(53, Short.MAX_VALUE))
         );
 
@@ -410,15 +416,15 @@ public class Form_Processo extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void valorEncargoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valorEncargoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_valorEncargoActionPerformed
 
-    private void jTextField1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyPressed
+    private void valorEncargoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_valorEncargoKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             jPanelEncargo.setVisible(false);
         }
-    }//GEN-LAST:event_jTextField1KeyPressed
+    }//GEN-LAST:event_valorEncargoKeyPressed
 
     private void salvar_movActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salvar_movActionPerformed
         // TODO add your handling code here:
@@ -456,6 +462,7 @@ public class Form_Processo extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButtonEncargoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEncargoActionPerformed
+        encargo = true;
         jPanelEncargo.setVisible(true);
         if (!(jButtonEncargo.isSelected())) {
             jPanelEncargo.setVisible(false);
@@ -468,12 +475,11 @@ public class Form_Processo extends javax.swing.JFrame {
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JFormattedTextField dataRef;
     private javax.swing.JFormattedTextField datal;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton7;
     private javax.swing.JToggleButton jButtonEncargo;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel5;
@@ -485,7 +491,6 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelEncargo;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel labelNome;
@@ -493,6 +498,8 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JTextField saldo;
     private javax.swing.JButton salvar_mov;
     private javax.swing.JTable tabelamov;
+    private javax.swing.JComboBox tipoEncargo;
     private javax.swing.JToolBar toolBarOptProcesso;
+    private javax.swing.JTextField valorEncargo;
     // End of variables declaration//GEN-END:variables
 }

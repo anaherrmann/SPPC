@@ -49,7 +49,7 @@ public class Form_Sistema extends javax.swing.JFrame {
     }
 
     public void populateTableProcesso() throws SQLException {
-        String sql = "SELECT processo, nome FROM processo";
+        String sql = "SELECT processo  as \"Processo\", nome  as \"Nome\" FROM processo";
 
         try {
             pstm = conn.prepareStatement(sql);
