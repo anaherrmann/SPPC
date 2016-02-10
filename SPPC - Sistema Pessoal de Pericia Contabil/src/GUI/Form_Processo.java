@@ -1,7 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * 
+ * Visualização da tela de Cadastro de Movimento e Encargo
+ * pega os valores do campos e manda para o dao
+ * 
  */
 package GUI;
 
@@ -9,7 +10,6 @@ import ClassModel.Movimento_Class;
 import ConnectionFactory.ConnectionFactory;
 import DataAccessObj.DAO_CadastroMovimento;
 import com.sun.glass.events.KeyEvent;
-import java.awt.Color;
 import java.awt.Window;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,13 +21,6 @@ import javax.swing.JOptionPane;
 import net.proteanit.sql.DbUtils;
 
 
-
-
-
-/**
- *
- * @author Leticia
- */
 public class Form_Processo extends javax.swing.JFrame {
 
     /**
@@ -39,14 +32,15 @@ public class Form_Processo extends javax.swing.JFrame {
     private ResultSet rs;
     private boolean encargo = false;
     
+    //p -> numero do processo selecionado(int)
+    //n -> nome do cliente selecionado(String)
     public Form_Processo(int p, String n) throws SQLException{
         initComponents();
         setLocationRelativeTo(null);
         jPanelEncargo.setVisible(false);
-        //getContentPane().setBackground(Color.white);
         toolBarOptProcesso.setVisible(false);
+        //getContentPane().setBackground(Color.white);
        
-        ///////////////////////////////////////////////////
         try {
             this.conn = new ConnectionFactory().getConnection();
         } catch (SQLException ex) {
@@ -55,34 +49,32 @@ public class Form_Processo extends javax.swing.JFrame {
             Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        if (n != null) this.setLabels(p, n);
+        if (n != null) this.setLabels(p, n); //joaga valores pra label em cima atualizados
    
         this.populateTableMovimento();
         this.setVisible(true);
     }
     
+     //Joga valores do banco na tabela
     public void populateTableMovimento() throws SQLException {
         String sql = String.format("SELECT datal as \"Data\", saldo as \"Saldo\", valor_encargo as \"Taxa Praticada\" FROM movimento WHERE processo = %s", labelProceso.getText());
-
         try {
             pstm = conn.prepareStatement(sql);
             rs = pstm.executeQuery();
-            
-            tabelamov.setModel(DbUtils.resultSetToTableModel(rs));
+            tabelaMov.setModel(DbUtils.resultSetToTableModel(rs));
             pstm.close();
-            
         } catch (SQLException ex) {
             Logger.getLogger(Form_Processo.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
     
-    
+    //Cria as labels com o numero do processo e nome do cliente
     public void setLabels(int processo, String nome){
         labelProceso.setText(String.valueOf(processo));
         labelNome.setText(nome);
     }
     
+    //Joga valores a serem cadastrados na classe movimento que será mandada ao banco;
     public void Register() throws SQLException {
         
         Movimento_Class movimento = new Movimento_Class();
@@ -91,16 +83,19 @@ public class Form_Processo extends javax.swing.JFrame {
         movimento.setData(datal.getText());
         movimento.setSaldo(Double.parseDouble(saldo.getText().replace(",", ".")));
         
-        if (encargo)
+        if (encargo) 
         {
             movimento.setDataRef(dataRef.getText());
             movimento.setTipoEncargo((String) tipoEncargo.getSelectedItem());
             movimento.setValorEncargo(Double.parseDouble(valorEncargo.getText().replace(",", ".")));
         }
 
-        if (datal.getText().isEmpty() || saldo.getText().isEmpty()) {
+        if (datal.getText().isEmpty() || saldo.getText().isEmpty()) 
+        {
             JOptionPane.showMessageDialog(null, "Não devem haver campos em branco!");
-        } else {
+        } 
+        else //envia dados para o DAO
+        {
             DAO_CadastroMovimento dao = new DAO_CadastroMovimento();
             dao.add(movimento, encargo);
             JOptionPane.showMessageDialog(null, "Movimento cadastrado.");
@@ -131,7 +126,7 @@ public class Form_Processo extends javax.swing.JFrame {
         labelNome = new javax.swing.JLabel();
         labelProceso = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tabelamov = new javax.swing.JTable();
+        tabelaMov = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -182,7 +177,7 @@ public class Form_Processo extends javax.swing.JFrame {
 
         jScrollPane1.setBorder(null);
 
-        tabelamov.setModel(new javax.swing.table.DefaultTableModel(
+        tabelaMov.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
                 {null, null, null},
@@ -208,7 +203,7 @@ public class Form_Processo extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(tabelamov);
+        jScrollPane1.setViewportView(tabelaMov);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Movimento"));
 
@@ -497,7 +492,7 @@ public class Form_Processo extends javax.swing.JFrame {
     private javax.swing.JLabel labelProceso;
     private javax.swing.JTextField saldo;
     private javax.swing.JButton salvar_mov;
-    private javax.swing.JTable tabelamov;
+    private javax.swing.JTable tabelaMov;
     private javax.swing.JComboBox tipoEncargo;
     private javax.swing.JToolBar toolBarOptProcesso;
     private javax.swing.JTextField valorEncargo;
